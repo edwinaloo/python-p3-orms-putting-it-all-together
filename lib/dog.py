@@ -13,8 +13,8 @@ class Dog:
     def create_table(cls):
         conn = sqlite3.connect('dog.db')
         try:
-            cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
-            cls.CURSOR.execute('''CREATE TABLE IF NOT EXISTS dogs 
+            Dog.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+            Dog.CURSOR.execute('''CREATE TABLE IF NOT EXISTS dogs 
                                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 name TEXT,
                                 breed TEXT)''')
@@ -26,8 +26,8 @@ class Dog:
     def drop_table(cls):
         conn = sqlite3.connect('dog.db')
         try:
-            cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
-            cls.CURSOR.execute('DROP TABLE IF EXISTS dogs')
+            Dog.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+            Dog.CURSOR.execute('DROP TABLE IF EXISTS dogs')
             conn.commit()
         finally:
             conn.close()
@@ -35,9 +35,9 @@ class Dog:
     def save(self):
         conn = sqlite3.connect('dog.db')
         try:
-            self.CURSOR = conn.cursor()  # Assign the CURSOR attribute
-            self.CURSOR.execute('INSERT INTO dogs (name, breed) VALUES (?, ?)', (self.name, self.breed))
-            self.id = self.CURSOR.lastrowid
+            Dog.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+            Dog.CURSOR.execute('INSERT INTO dogs (name, breed) VALUES (?, ?)', (self.name, self.breed))
+            self.id = Dog.CURSOR.lastrowid
             conn.commit()
         finally:
             conn.close()
@@ -58,13 +58,13 @@ class Dog:
     def get_all(cls):
         conn = sqlite3.connect('dog.db')
         try:
-            cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
-            cls.CURSOR.execute('SELECT * FROM dogs')
-            rows = cls.CURSOR.fetchall()
+            Dog.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+            Dog.CURSOR.execute('SELECT * FROM dogs')
+            rows = Dog.CURSOR.fetchall()
 
             dogs = []
             for row in rows:
-                dog = cls.new_from_db(row)
+                dog = Dog.new_from_db(row)
                 dogs.append(dog)
         finally:
             conn.close()
@@ -75,12 +75,12 @@ class Dog:
     def find_by_name(cls, name):
         conn = sqlite3.connect('dog.db')
         try:
-            cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
-            cls.CURSOR.execute('SELECT * FROM dogs WHERE name = ?', (name,))
-            row = cls.CURSOR.fetchone()
+            Dog.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+            Dog.CURSOR.execute('SELECT * FROM dogs WHERE name = ?', (name,))
+            row = Dog.CURSOR.fetchone()
 
             if row:
-                dog = cls.new_from_db(row)
+                dog = Dog.new_from_db(row)
             else:
                 dog = None
         finally:
@@ -92,12 +92,12 @@ class Dog:
     def find_by_id(cls, id):
         conn = sqlite3.connect('dog.db')
         try:
-            cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
-            cls.CURSOR.execute('SELECT * FROM dogs WHERE id = ?', (id,))
-            row = cls.CURSOR.fetchone()
+            Dog.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+            Dog.CURSOR.execute('SELECT * FROM dogs WHERE id = ?', (id,))
+            row = Dog.CURSOR.fetchone()
 
             if row:
-                dog = cls.new_from_db(row)
+                dog = Dog.new_from_db(row)
             else:
                 dog = None
         finally:
@@ -108,8 +108,8 @@ class Dog:
     def update(self):
         conn = sqlite3.connect('dog.db')
         try:
-            self.CURSOR = conn.cursor()  # Assign the CURSOR attribute
-            self.CURSOR.execute('UPDATE dogs SET name = ?, breed = ? WHERE id = ?', (self.name, self.breed, self.id))
+            Dog.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+            Dog.CURSOR.execute('UPDATE dogs SET name = ?, breed = ? WHERE id = ?', (self.name, self.breed, self.id))
             conn.commit()
         finally:
             conn.close()
