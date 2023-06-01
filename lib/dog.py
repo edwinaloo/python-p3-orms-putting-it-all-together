@@ -2,6 +2,8 @@ import sqlite3
 
 
 class Dog:
+    CURSOR = None  # Define the CURSOR attribute
+
     def __init__(self, name, breed):
         self.name = name
         self.breed = breed
@@ -10,12 +12,11 @@ class Dog:
     @classmethod
     def create_table(cls):
         conn = sqlite3.connect('dog.db')
-        c = conn.cursor()
-
-        c.execute('''CREATE TABLE IF NOT EXISTS dogs 
-                    (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT,
-                    breed TEXT)''')
+        cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+        cls.CURSOR.execute('''CREATE TABLE IF NOT EXISTS dogs 
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            name TEXT,
+                            breed TEXT)''')
 
         conn.commit()
         conn.close()
@@ -23,42 +24,41 @@ class Dog:
     @classmethod
     def drop_table(cls):
         conn = sqlite3.connect('dog.db')
-        c = conn.cursor()
-
-        c.execute('DROP TABLE IF EXISTS dogs')
+        cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+        cls.CURSOR.execute('DROP TABLE IF EXISTS dogs')
 
         conn.commit()
         conn.close()
 
     def save(self):
         conn = sqlite3.connect('dog.db')
-        c = conn.cursor()
+        self.CURSOR = conn.cursor()  # Assign the CURSOR attribute
 
-        c.execute('INSERT INTO dogs (name, breed) VALUES (?, ?)', (self.name, self.breed))
-        self.id = c.lastrowid
+        self.CURSOR.execute('INSERT INTO dogs (name, breed) VALUES (?, ?)', (self.name, self.breed))
+        self.id = self.CURSOR.lastrowid
 
         conn.commit()
         conn.close()
 
     @classmethod
     def create(cls, name, breed):
-        dog = cls(name, breed)
-        dog.save()
-        return dog
+        self = cls(name, breed)  # Use 'self' instead of 'dog'
+        self.save()
+        return self
 
     @classmethod
     def new_from_db(cls, row):
-        dog = cls(row[1], row[2])
-        dog.id = row[0]
-        return dog
+        self = cls(row[1], row[2])  # Use 'self' instead of 'dog'
+        self.id = row[0]
+        return self
 
     @classmethod
     def get_all(cls):
         conn = sqlite3.connect('dog.db')
-        c = conn.cursor()
+        cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
 
-        c.execute('SELECT * FROM dogs')
-        rows = c.fetchall()
+        cls.CURSOR.execute('SELECT * FROM dogs')
+        rows = cls.CURSOR.fetchall()
 
         dogs = []
         for row in rows:
@@ -71,10 +71,10 @@ class Dog:
     @classmethod
     def find_by_name(cls, name):
         conn = sqlite3.connect('dog.db')
-        c = conn.cursor()
+        cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
 
-        c.execute('SELECT * FROM dogs WHERE name = ?', (name,))
-        row = c.fetchone()
+        cls.CURSOR.execute('SELECT * FROM dogs WHERE name = ?', (name,))
+        row = cls.CURSOR.fetchone()
 
         if row:
             dog = cls.new_from_db(row)
@@ -87,10 +87,10 @@ class Dog:
     @classmethod
     def find_by_id(cls, id):
         conn = sqlite3.connect('dog.db')
-        c = conn.cursor()
+        cls.CURSOR = conn.cursor()  # Assign the CURSOR attribute
 
-        c.execute('SELECT * FROM dogs WHERE id = ?', (id,))
-        row = c.fetchone()
+        cls.CURSOR.execute('SELECT * FROM dogs WHERE id = ?', (id,))
+        row = cls.CURSOR.fetchone()
 
         if row:
             dog = cls.new_from_db(row)
@@ -99,3 +99,12 @@ class Dog:
 
         conn.close()
         return dog
+
+    def update(self):
+        conn = sqlite3.connect('dog.db')
+        self.CURSOR = conn.cursor()  # Assign the CURSOR attribute
+
+        self.CURSOR.execute('UPDATE dogs SET name = ?, breed = ? WHERE id = ?', (self.name, self.breed, self.id))
+
+        conn.commit()
+        conn.close()
