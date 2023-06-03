@@ -3,10 +3,10 @@ import sqlite3
 class Dog:
     @classmethod
     def create_table(cls):
-        CONN = sqlite3.connect("dogs.db")
-        CURSOR = CONN.cursor()
+        conn = sqlite3.connect("dogs.db")
+        cursor = conn.cursor()
 
-        CURSOR.execute("""
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS dogs (
                 id INTEGER PRIMARY KEY,
                 name TEXT,
@@ -14,20 +14,20 @@ class Dog:
             )
         """)
 
-        CONN.commit()
-        CURSOR.close()
-        CONN.close()
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     @classmethod
     def drop_table(cls):
-        CONN = sqlite3.connect("dogs.db")
-        CURSOR = CONN.cursor()
+        conn = sqlite3.connect("dogs.db")
+        cursor = conn.cursor()
 
-        CURSOR.execute("DROP TABLE IF EXISTS dogs")
+        cursor.execute("DROP TABLE IF EXISTS dogs")
 
-        CONN.commit()
-        CURSOR.close()
-        CONN.close()
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     def __init__(self, name, breed):
         self.name = name
@@ -35,18 +35,18 @@ class Dog:
         self.id = None  # Initialize id as None initially
 
     def save(self):
-        CONN = sqlite3.connect("dogs.db")
-        CURSOR = CONN.cursor()
+        conn = sqlite3.connect("dogs.db")
+        cursor = conn.cursor()
 
         if self.id is None:
-            CURSOR.execute("INSERT INTO dogs (name, breed) VALUES (?, ?)", (self.name, self.breed))
-            self.id = CURSOR.lastrowid
+            cursor.execute("INSERT INTO dogs (name, breed) VALUES (?, ?)", (self.name, self.breed))
+            self.id = cursor.lastrowid
         else:
-            CURSOR.execute("UPDATE dogs SET name = ?, breed = ? WHERE id = ?", (self.name, self.breed, self.id))
+            cursor.execute("UPDATE dogs SET name = ?, breed = ? WHERE id = ?", (self.name, self.breed, self.id))
 
-        CONN.commit()
-        CURSOR.close()
-        CONN.close()
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     @classmethod
     def create(cls, name, breed):
@@ -62,27 +62,27 @@ class Dog:
 
     @classmethod
     def get_all(cls):
-        CONN = sqlite3.connect("dogs.db")
-        CURSOR = CONN.cursor()
+        conn = sqlite3.connect("dogs.db")
+        cursor = conn.cursor()
 
-        CURSOR.execute("SELECT * FROM dogs")
-        rows = CURSOR.fetchall()
+        cursor.execute("SELECT * FROM dogs")
+        rows = cursor.fetchall()
 
-        CURSOR.close()
-        CONN.close()
+        cursor.close()
+        conn.close()
 
         return [cls.new_from_db(row) for row in rows]
 
     @classmethod
     def find_by_name(cls, name):
-        CONN = sqlite3.connect("dogs.db")
-        CURSOR = CONN.cursor()
+        conn = sqlite3.connect("dogs.db")
+        cursor = conn.cursor()
 
-        CURSOR.execute("SELECT * FROM dogs WHERE name = ?", (name,))
-        row = CURSOR.fetchone()
+        cursor.execute("SELECT * FROM dogs WHERE name = ?", (name,))
+        row = cursor.fetchone()
 
-        CURSOR.close()
-        CONN.close()
+        cursor.close()
+        conn.close()
 
         if row is not None:
             return cls.new_from_db(row)
@@ -90,20 +90,20 @@ class Dog:
 
     @classmethod
     def find_by_id(cls, id):
-        CONN = sqlite3.connect("dogs.db")
-        CURSOR = CONN.cursor()
+        conn = sqlite3.connect("dogs.db")
+        cursor = conn.cursor()
 
-        CURSOR.execute("SELECT * FROM dogs WHERE id = ?", (id,))
-        row = CURSOR.fetchone()
+        cursor.execute("SELECT * FROM dogs WHERE id = ?", (id,))
+        row = cursor.fetchone()
 
-        CURSOR.close()
-        CONN.close()
+        cursor.close()
+        conn.close()
 
         if row is not None:
             return cls.new_from_db(row)
         return None
 
-    # Bonus methods (uncomment tests in the pytest file to run)
+    # Bonus methods
     @classmethod
     def find_or_create_by(cls, name, breed):
         dog = cls.find_by_name(name)
@@ -113,7 +113,6 @@ class Dog:
 
     def update(self):
         old_name = self.name
-        self.name = old_name
         self.save()
         updated_dog = Dog.find_by_name(old_name)
         return updated_dog
