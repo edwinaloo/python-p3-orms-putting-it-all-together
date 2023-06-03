@@ -1,37 +1,52 @@
 import sqlite3
 
 class Dog:
-    CONN = sqlite3.connect("dogs.db")
-    CURSOR = CONN.cursor()
-
-    def __init__(self, name, breed):
-        self.name = name
-        self.breed = breed
-        self.id = None  # Initialize id as None initially
-
     @classmethod
     def create_table(cls):
-        cls.CURSOR.execute("""
+        CONN = sqlite3.connect("dogs.db")
+        CURSOR = CONN.cursor()
+
+        CURSOR.execute("""
             CREATE TABLE IF NOT EXISTS dogs (
                 id INTEGER PRIMARY KEY,
                 name TEXT,
                 breed TEXT
             )
         """)
-        cls.CONN.commit()
+
+        CONN.commit()
+        CURSOR.close()
+        CONN.close()
 
     @classmethod
     def drop_table(cls):
-        cls.CURSOR.execute("DROP TABLE IF EXISTS dogs")
-        cls.CONN.commit()
+        CONN = sqlite3.connect("dogs.db")
+        CURSOR = CONN.cursor()
+
+        CURSOR.execute("DROP TABLE IF EXISTS dogs")
+
+        CONN.commit()
+        CURSOR.close()
+        CONN.close()
+
+    def __init__(self, name, breed):
+        self.name = name
+        self.breed = breed
+        self.id = None  # Initialize id as None initially
 
     def save(self):
+        CONN = sqlite3.connect("dogs.db")
+        CURSOR = CONN.cursor()
+
         if self.id is None:
-            self.CURSOR.execute("INSERT INTO dogs (name, breed) VALUES (?, ?)", (self.name, self.breed))
-            self.id = self.CURSOR.lastrowid
+            CURSOR.execute("INSERT INTO dogs (name, breed) VALUES (?, ?)", (self.name, self.breed))
+            self.id = CURSOR.lastrowid
         else:
-            self.CURSOR.execute("UPDATE dogs SET name = ?, breed = ? WHERE id = ?", (self.name, self.breed, self.id))
-        self.CONN.commit()
+            CURSOR.execute("UPDATE dogs SET name = ?, breed = ? WHERE id = ?", (self.name, self.breed, self.id))
+
+        CONN.commit()
+        CURSOR.close()
+        CONN.close()
 
     @classmethod
     def create(cls, name, breed):
@@ -47,22 +62,43 @@ class Dog:
 
     @classmethod
     def get_all(cls):
-        cls.CURSOR.execute("SELECT * FROM dogs")
-        rows = cls.CURSOR.fetchall()
+        CONN = sqlite3.connect("dogs.db")
+        CURSOR = CONN.cursor()
+
+        CURSOR.execute("SELECT * FROM dogs")
+        rows = CURSOR.fetchall()
+
+        CURSOR.close()
+        CONN.close()
+
         return [cls.new_from_db(row) for row in rows]
 
     @classmethod
     def find_by_name(cls, name):
-        cls.CURSOR.execute("SELECT * FROM dogs WHERE name = ?", (name,))
-        row = cls.CURSOR.fetchone()
+        CONN = sqlite3.connect("dogs.db")
+        CURSOR = CONN.cursor()
+
+        CURSOR.execute("SELECT * FROM dogs WHERE name = ?", (name,))
+        row = CURSOR.fetchone()
+
+        CURSOR.close()
+        CONN.close()
+
         if row is not None:
             return cls.new_from_db(row)
         return None
 
     @classmethod
     def find_by_id(cls, id):
-        cls.CURSOR.execute("SELECT * FROM dogs WHERE id = ?", (id,))
-        row = cls.CURSOR.fetchone()
+        CONN = sqlite3.connect("dogs.db")
+        CURSOR = CONN.cursor()
+
+        CURSOR.execute("SELECT * FROM dogs WHERE id = ?", (id,))
+        row = CURSOR.fetchone()
+
+        CURSOR.close()
+        CONN.close()
+
         if row is not None:
             return cls.new_from_db(row)
         return None
